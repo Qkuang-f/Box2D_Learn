@@ -1,11 +1,12 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace Box2DSharp.Testbed.Unity.Inspection
+namespace QkF.Box2D
 {
     [ExecuteInEditMode]
-    public class UnityDrawer : MonoBehaviour
+    public class QkUnityDrawer : MonoBehaviour
     {
         private const string SceneCameraName = "SceneCamera";
 
@@ -13,26 +14,26 @@ namespace Box2DSharp.Testbed.Unity.Inspection
 
         private static Material _lineMaterial;
 
-       /// <summary>GL Color</summary>
+        /// <summary>GL Color</summary>
         private readonly List<Color> _colors = new List<Color>();
         /// <summary>GL line</summary>
         private readonly List<List<(Vector3 begin, Vector3 end)>> _lines = new List<List<(Vector3, Vector3)>>();
 
         private readonly List<(Vector3 Center, float Radius, Color color)> _points =
             new List<(Vector3 Center, float Radius, Color color)>();
-          
-        public static UnityDrawer GetDrawer()
+
+        public static QkUnityDrawer GetDrawer()
         {
-            var drawLines = FindObjectOfType<UnityDrawer>();
+            var drawLines = FindObjectOfType<QkUnityDrawer>();
             if (drawLines == default)
             {
-                drawLines = GameObject.FindWithTag(MainCameraTag).AddComponent<UnityDrawer>();
+                drawLines = GameObject.FindWithTag(MainCameraTag).AddComponent<QkUnityDrawer>();
             }
 
             return drawLines;
         }
 
-        private void OnRenderObject()
+        public void GLDraw()
         {
             if (Camera.current == default)
             {
@@ -85,13 +86,14 @@ namespace Box2DSharp.Testbed.Unity.Inspection
             _points.Add(point);
         }
 
-        private void Update()
+        /// <summary>情况绘制数据，请在下一帧绘制之前调用</summary>
+        public void Clear()
         {
             _lines.Clear();
             _colors.Clear();
             _points.Clear();
         }
-
+         
         private static void CreateLineMaterial()
         {
             if (_lineMaterial)
@@ -102,14 +104,14 @@ namespace Box2DSharp.Testbed.Unity.Inspection
             // Unity has a built-in shader that is useful for drawing
             // simple colored things.
             var shader = Shader.Find("Hidden/Internal-Colored");
-            _lineMaterial = new Material(shader) {hideFlags = HideFlags.HideAndDontSave};
+            _lineMaterial = new Material(shader) { hideFlags = HideFlags.HideAndDontSave };
 
             // Turn on alpha blending
-            _lineMaterial.SetInt("_SrcBlend", (int) BlendMode.SrcAlpha);
-            _lineMaterial.SetInt("_DstBlend", (int) BlendMode.OneMinusSrcAlpha);
+            _lineMaterial.SetInt("_SrcBlend", (int)BlendMode.SrcAlpha);
+            _lineMaterial.SetInt("_DstBlend", (int)BlendMode.OneMinusSrcAlpha);
 
             // Turn backface culling off
-            _lineMaterial.SetInt("_Cull", (int) CullMode.Off);
+            _lineMaterial.SetInt("_Cull", (int)CullMode.Off);
 
             // Turn off depth writes
             _lineMaterial.SetInt("_ZWrite", 0);
